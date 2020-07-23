@@ -26,12 +26,12 @@ from    src.utils       import *
 # Main function
 #----------------------------------------------------------------------
 if __name__ == "__main__":
-    if platform == 'darwin':
-        config = dict2(**{
-            "annotations": './data/Sample.csv',     # contains (video url, start, end, action, justification)
-            "vid_path":    './data/Videos/videos/'})
-    else:
-        raise NotImplementedError
+
+    config = dict2(**{
+        "annotations": '../data/Sample.csv',     # contains (video url, start, end, action, justification)
+        "vid_path":    '../data/Videos/videos/'})
+    # else:
+    #     raise NotImplementedError
 
     if not os.path.exists(config.vid_path): os.makedirs(config.vid_path)
 
@@ -61,8 +61,6 @@ if __name__ == "__main__":
             str2read = '%s%s.mov'%(config.vid_path, vidName) # original resolution: 720x1280
             if not os.path.exists(str2read):
                 print(bcolors.BOLD + "Download video clips: {}".format(vidName) + bcolors.ENDC)
-                wget.download(item['Input.Video'], out=str2read)     
+                wget.download(item['Input.Video'], out=str2read)
             else:
                 print(bcolors.BOLD + "Already downloaded: {}".format(vidName) + bcolors.ENDC)
-
-
