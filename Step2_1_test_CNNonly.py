@@ -8,7 +8,7 @@
 #
 # Date created      : 20181214
 #
-# Purpose           : Testing CNN+FF (feed forward) model 
+# Purpose           : Testing CNN+FF (feed forward) model
 #
 # Revision History  :
 #
@@ -45,7 +45,7 @@ if __name__ == "__main__":
   parser.add_argument('--gpu_fraction',  type=float,default=0.7,   help='GPU usage limit')
   args = parser.parse_args()
 
-  if platform == 'darwin':
+  if platform == 'win32':
     args.model    = "./model/CNN/model-0.ckpt"
     args.savepath = "./result/CNN/"
     config.batch_size = 1
@@ -75,9 +75,9 @@ if __name__ == "__main__":
   NVIDIA_model = NVIDIA_CNN(sess, USE_SINGLE_FRAME=USE_SINGLE_FRAME)
 
   # Preprocessor
-  if USE_SINGLE_FRAME: 
+  if USE_SINGLE_FRAME:
     pre_processor = PreProcessor_CNN()
-  else: 
+  else:
     pre_processor = PreProcessor_CNN_4frame()
 
   # Load the pretrained model
@@ -97,11 +97,11 @@ if __name__ == "__main__":
     nImg     = cam['X'].shape[0]
 
     # preprocess logs
-    curvature_value     = preprocess_others(log["curvature"][:], nImg) 
-    accelerator_value   = preprocess_others(log["accelerator"][:], nImg) 
-    speed_value         = preprocess_others(log["speed"][:], nImg) 
-    course_value        = preprocess_course(log["course"][:], nImg)      
-    goaldir_value       = preprocess_others(log["goaldir"][:], nImg) 
+    curvature_value     = preprocess_others(log["curvature"][:], nImg)
+    accelerator_value   = preprocess_others(log["accelerator"][:], nImg)
+    speed_value         = preprocess_others(log["speed"][:], nImg)
+    course_value        = preprocess_course(log["course"][:], nImg)
+    goaldir_value       = preprocess_others(log["goaldir"][:], nImg)
 
     if args.extractFeature: feats = []
 
@@ -116,7 +116,7 @@ if __name__ == "__main__":
       goaldir    = goaldir_value[i:i+4]
 
       # preprocessing
-      X, curvatures, accelerators, speeds, courses, _, goaldirs, _ = pre_processor.process(sess, 
+      X, curvatures, accelerators, speeds, courses, _, goaldirs, _ = pre_processor.process(sess,
         img[None,:,:,:,:], course[None,:,:], speed[None,:,:], curvature[None,:,:], accel[None,:,:], goaldir[None,:,:])
 
       # inference
@@ -166,11 +166,3 @@ if __name__ == "__main__":
       print(config.h5path + "feat/" + dataset + ".h5")
       f     = h5py.File(config.h5path + "feat/" + dataset + ".h5", "w")
       dset  = f.create_dataset("/X", data=feats, chunks=(20,64,12,20))
-
-
-
-
-
-
-
-

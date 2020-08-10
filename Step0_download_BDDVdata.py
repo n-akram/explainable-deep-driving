@@ -26,14 +26,15 @@ from    src.utils       import *
 # Main function
 #----------------------------------------------------------------------
 if __name__ == "__main__":
+    if True:
+        config = dict2(**{
+            "annotations": 'C:/Users/HP/Desktop/Projects/Fraunhoffer/explainable-deep-driving/data/Sample.csv',     # contains (video url, start, end, action, justification)
+            "vid_path":    'C:/Users/HP/Desktop/Projects/Fraunhoffer/explainable-deep-driving/data/Videos/videos/'})
+    else:
+        raise NotImplementedError
 
-    config = dict2(**{
-        "annotations": '../data/Sample.csv',     # contains (video url, start, end, action, justification)
-        "vid_path":    '../data/Videos/videos/'})
-    # else:
-    #     raise NotImplementedError
-
-    if not os.path.exists(config.vid_path): os.makedirs(config.vid_path)
+    if not os.path.exists(config.vid_path):
+        os.makedirs(config.vid_path)
 
     with open(config.annotations) as f_obj:
         examples = csv_dict_reader(f_obj)

@@ -54,6 +54,7 @@ elif MODE=="VA":
         "batch_size":   2,     #20,    
         "timelen":      20+3,  #20+3, 
         "ctx_shape":    [240,64],
-        "alpha_c":      0.0})
+        "alpha_c":      0.0,
+	"gpu_fraction": 0.8 })
 else:
     raise NotImplementedError

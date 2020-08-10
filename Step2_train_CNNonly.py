@@ -36,8 +36,11 @@ if __name__ == "__main__":
   args = parser.parse_args()
 
   # Open a tensorflow session
+  print(config)
   gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=config.gpu_fraction)
-  sess        = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
+  configa = tf.ConfigProto(device_count = {'GPU': 0})
+  #sess        = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
+  sess        = tf.Session(config=configa)
 
   # Create a CNN+FF model
   USE_SINGLE_FRAME = False      # if False, model use 4 consecutive frames as an input

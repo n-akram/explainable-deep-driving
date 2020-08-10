@@ -38,11 +38,11 @@ from    src.utils       import *
 # Main function
 #----------------------------------------------------------------------
 if __name__ == "__main__":
-    if platform == 'darwin':
+    if platform == 'win32':
         config = dict2(**{
-            "annotations":  './data/Sample.csv', # (video url, start, end, action, justification)
-            "save_path":    './data/processed/',
-            "data_path":    './data/Videos/',
+            "annotations":  'C:/Users/HP/Desktop/Projects/Fraunhoffer/explainable-deep-driving/data/Sample.csv', # (video url, start, end, action, justification)
+            "save_path":    'C:/Users/HP/Desktop/Projects/Fraunhoffer/explainable-deep-driving/data/processed/',
+            "data_path":    'C:/Users/HP/Desktop/Projects/Fraunhoffer/explainable-deep-driving/data/Videos/',
             "chunksize":    20 })
     else:
         raise NotImplementedError
@@ -59,6 +59,7 @@ if __name__ == "__main__":
     # output path
     if not os.path.exists(config.save_path+"log/"): os.makedirs(config.save_path+"log/")
     if not os.path.exists(config.save_path+"cam/"): os.makedirs(config.save_path+"cam/")
+    #if not os.path.exists(config.save_path+"info/"): os.makedirs(config.save_path+"info/")
 
     # Read information about video clips
     with open(config.annotations) as f_obj:
@@ -76,36 +77,42 @@ if __name__ == "__main__":
 
             vidName  = item['Input.Video'].split("/")[-1][:-4]
 
-            if len(vidName)==0: 
-                vidNames_notUSED.append(str(videoid) + "_" + str(vidName))
-                continue   
-            if len(item["Answer.1start"])==0: 
+            if len(vidName)==0:
                 vidNames_notUSED.append(str(videoid) + "_" + str(vidName))
                 continue
-            if len(item["Answer.1justification"])==0: 
+            if len(item["Answer.1start"])==0:
                 vidNames_notUSED.append(str(videoid) + "_" + str(vidName))
-                continue       
+                continue
+            if len(item["Answer.1justification"])==0:
+                vidNames_notUSED.append(str(videoid) + "_" + str(vidName))
+                continue
 
-            videoid += 1  
+            videoid += 1
 
             #print(bcolors.HEADER + "Video: {}".format(vidName) + bcolors.ENDC)
-            
+
 
             #--------------------------------------------------
             # 1. Control signals
             #--------------------------------------------------
             str2find  = '%sinfo/%s.json'%(config.data_path, vidName)
-            json2read = glob.glob(str2find)
+            #print(str2find)
+            json2read = glob.glob(str2find,recursive = False)
+            for a in json2read:
+                print(a)
 
-            if json2read: 
+
+
+            if json2read:
+                print(json2read)
                 json2read = json2read[0]
-            else: 
-            	print( bcolors.FAIL + "Unable to read json file: {}".format(str2find) + bcolors.ENDC )
+            else:
+                print( bcolors.FAIL + "Unable to read json file: {}".format(str2find) + bcolors.ENDC )
                 vidNames_notUSED.append(str(videoid) + "_" + str(vidName))
                 continue
 
-                # MuteVideo data set seems to have different label format.
-                # Will use first eight codes
+                #MuteVideo data set seems to have different label format.
+                #Will use first eight codes
                 #json2read = glob.glob('%sinfo/*/*%s*.json'%(config.data_path, vidName[:8]))
                 #if json2read:
                 #    json2read = json2read[0]
@@ -173,7 +180,7 @@ if __name__ == "__main__":
                 nEx         += 1
                 captionid   += 1
 
-                # Info 
+                # Info
                 feed_dict = { 'contributor':    'Berkeley DeepDrive',
                               'date_created':   time.strftime("%d/%m/%Y"),
                               'description':    'This is 0.1 version of the BDD-X dataset',
@@ -219,11 +226,11 @@ if __name__ == "__main__":
             cnt      = 0
             scalefactor = 1
 
-            if (os.path.isfile(config.save_path+"cam/"+ str(videoid) + "_" + str(vidName) + ".h5")) == True: 
-                print(bcolors.GREEN + 
-                    'File already generated (decoding): {}'.format(str(videoid) + "_" + str(vidName)) 
+            if (os.path.isfile(config.save_path+"cam/"+ str(videoid) + "_" + str(vidName) + ".h5")) == True:
+                print(bcolors.GREEN +
+                    'File already generated (decoding): {}'.format(str(videoid) + "_" + str(vidName))
                     + bcolors.ENDC)
-            
+
             elif os.path.exists(str2read):
                 metadata = skvideo.io.ffprobe(str2read)
 
@@ -235,8 +242,8 @@ if __name__ == "__main__":
                 cap = cv2.VideoCapture(str2read)
                 nFrames, img_width, img_height, fps = get_vid_info(cap)
 
-                print(bcolors.GREEN + 
-                    'ID: {}, #Frames: {}, nGPSrecords: {}, Image: {}x{}, FPS: {}'.format(vidName, nFrames, len(trajectories), img_width, img_height, fps) 
+                print(bcolors.GREEN +
+                    'ID: {}, #Frames: {}, nGPSrecords: {}, Image: {}x{}, FPS: {}'.format(vidName, nFrames, len(trajectories), img_width, img_height, fps)
                     + bcolors.ENDC)
 
                 for i in tqdm(range(nFrames)):
@@ -251,9 +258,9 @@ if __name__ == "__main__":
                             else: 				frame = frame.swapaxes(1,0)
 
                             frame = cv2.resize(frame, None, fx=0.125*scalefactor, fy=0.125*scalefactor)
-                            
+
                             assert frame.shape == (90*scalefactor, 160*scalefactor, 3)
-                            
+
                             if cnt%100==0:
                                 #cv2.imshow('image', frame)
                                 #cv2.waitKey(10)
@@ -265,8 +272,8 @@ if __name__ == "__main__":
 
                 cap.release()
             else:
-                print(bcolors.FAIL + 
-                    'ERROR: Unable to open video {}'.format(str2read) 
+                print(bcolors.FAIL +
+                    'ERROR: Unable to open video {}'.format(str2read)
                     + bcolors.ENDC)
                 break
 
@@ -279,18 +286,18 @@ if __name__ == "__main__":
             # 4. Saving
             #--------------------------------------------------
             vidNames.append(str(videoid) + "_" + str(vidName))
-            
-            if (os.path.isfile(config.save_path+"cam/"+ str(videoid) + "_" + str(vidName) + ".h5")) == False: 
+
+            if (os.path.isfile(config.save_path+"cam/"+ str(videoid) + "_" + str(vidName) + ".h5")) == False:
                 cam = h5py.File(config.save_path+ "cam/" + str(videoid) + "_" + str(vidName) + ".h5", "w")
                 dset = cam.create_dataset("/X",         data=frames,   chunks=(config.chunksize,90*scalefactor,160*scalefactor,3), dtype='uint8')
             else:
-                print(bcolors.GREEN + 
-                    'File already generated (cam): {}'.format(str(videoid) + "_" + str(vidName)) 
+                print(bcolors.GREEN +
+                    'File already generated (cam): {}'.format(str(videoid) + "_" + str(vidName))
                     + bcolors.ENDC)
-            
-            if (os.path.isfile(config.save_path+"log/"+ str(videoid) + "_" + str(vidName) + ".h5")) == False: 
+
+            if (os.path.isfile(config.save_path+"log/"+ str(videoid) + "_" + str(vidName) + ".h5")) == False:
                 log = h5py.File(config.save_path+ "log/" + str(videoid) + "_" + str(vidName) + ".h5", "w")
-            
+
                 dset = log.create_dataset("/timestamp", data=timestamp)
                 dset = log.create_dataset("/longitude", data=longitude)
                 dset = log.create_dataset("/course",    data=course)
@@ -303,21 +310,11 @@ if __name__ == "__main__":
                 dset = log.create_dataset("/goaldir",    data=goalDirection, dtype='float')
 
             else:
-                print(bcolors.GREEN + 
-                    'File already generated (log): {}'.format(str(videoid) + "_" + str(vidName)) 
+                print(bcolors.GREEN +
+                    'File already generated (log): {}'.format(str(videoid) + "_" + str(vidName))
                     + bcolors.ENDC)
-  
-    with open(config.save_path+'captions_BDDX.json', 'w') as outfile:  
+
+    with open(config.save_path+'captions_BDDX.json', 'w') as outfile:
         json.dump(data, outfile)
 
     np.save(config.save_path + 'vidNames_notUSED.npy', vidNames_notUSED)
-    
-
-
-
-    
-
-
-
-
-
