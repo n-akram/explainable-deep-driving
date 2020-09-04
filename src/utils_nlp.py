@@ -28,7 +28,8 @@ from    sklearn.feature_extraction.text import TfidfVectorizer
 from    collections     import Counter
 import  numpy           as np
 import  h5py
-import  cPickle         as     pickle
+import  pickle
+#import  cPickle         as     pickle
 
 
 def process_caption_data(caption_file, image_dir, max_length):
@@ -48,16 +49,17 @@ def process_caption_data(caption_file, image_dir, max_length):
         caption = caption.replace('.','').replace(',','').replace('"','').replace("'","").replace("`","")
         caption = caption.replace('&','and').replace('(',' ').replace(')',' ').replace('-',' ')
         caption = " ".join(caption.split())  # replace multiple spaces
-        
-        caption_data.set_value(i, 'caption', caption.lower())
+
+        # caption_data.set_value(i, 'caption', caption.lower())
+        caption_data.loc[i, 'caption'] = caption.lower()
         if len(caption.split(" ")) > max_length:
             del_idx.append(i)
-    
+
     # delete captions if size is larger than max_length
-    print( bcolors.BLUE + "[_process_caption_data] The number of captions before deletion: %d" %len(caption_data) + bcolors.ENDC ) 
+    print( bcolors.BLUE + "[_process_caption_data] The number of captions before deletion: %d" %len(caption_data) + bcolors.ENDC )
     caption_data = caption_data.drop(caption_data.index[del_idx])
     caption_data = caption_data.reset_index(drop=True)
-    print( bcolors.BLUE + "[_process_caption_data] The number of captions after deletion: %d" %len(caption_data) + bcolors.ENDC ) 
+    print( bcolors.BLUE + "[_process_caption_data] The number of captions after deletion: %d" %len(caption_data) + bcolors.ENDC )
 
     return caption_data
 
@@ -71,7 +73,7 @@ def build_vocab(annotations, size_of_dict=10000):
         words = caption.split(' ') # caption contrains only lower-case words
         for w in words:
             counter[w] +=1
-        
+
         if len(caption.split(" ")) > max_len:
             max_len = len(caption.split(" "))
 
@@ -97,7 +99,7 @@ def build_caption_vector(annotations, word_to_idx, max_length=15):
     print(bcolors.GREEN + '[_build_caption_vector] String caption -> Indexed caption' + bcolors.ENDC)
 
     n_examples = len(annotations)
-    captions = np.ndarray((n_examples,max_length+2)).astype(np.int32)   
+    captions = np.ndarray((n_examples,max_length+2)).astype(np.int32)
 
     for i, caption in enumerate(annotations['caption']):
         words = caption.split(" ") # caption contrains only lower-case words
@@ -109,12 +111,12 @@ def build_caption_vector(annotations, word_to_idx, max_length=15):
             else:
                 cap_vec.append(word_to_idx['<UNK>'])
         cap_vec.append(word_to_idx['<END>'])
-        
+
         # pad short caption with the special null token '<NULL>' to make it fixed-size vector
         if len(cap_vec) < (max_length + 2):
             for j in range(max_length + 2 - len(cap_vec)):
-                cap_vec.append(word_to_idx['<NULL>']) 
-        
+                cap_vec.append(word_to_idx['<NULL>'])
+
         captions[i, :] = np.asarray(cap_vec)
 
     print(bcolors.BLUE + '[_build_caption_vector] Building caption vectors' + bcolors.ENDC)
@@ -202,10 +204,10 @@ def build_feat_matrix(annotations, max_length, fpath, hz=10, sampleInterval=5, F
     all_logs['pred_courses']= np.ndarray([n_examples, max_length], dtype=np.float32)
 
 
-    all_masks4Cap = np.ndarray([n_examples, max_length], dtype=np.float32)  
+    all_masks4Cap = np.ndarray([n_examples, max_length], dtype=np.float32)
     #all_feats4Cap = np.memmap('/data2/tmp.dat', dtype='float32', mode='w+', shape=(n_examples, max_length, 64, 12, 20))
-    all_feats4Cap = np.ndarray([n_examples, max_length, 64, 12, 20], dtype=np.float32) 
-    all_attns4Cap = np.ndarray([n_examples, max_length, 12*20], dtype=np.float32) 
+    all_feats4Cap = np.ndarray([n_examples, max_length, 64, 12, 20], dtype=np.float32)
+    all_attns4Cap = np.ndarray([n_examples, max_length, 12*20], dtype=np.float32)
 
     sTimes       = annotations['sTime']      # staring timestamp
     eTimes       = annotations['eTime']      # ending timestamp
@@ -218,8 +220,8 @@ def build_feat_matrix(annotations, max_length, fpath, hz=10, sampleInterval=5, F
         print(bcolors.BLUE + '[_build_feat_matrix] vidName: {}'.format(vidName) + bcolors.ENDC)
 
         # load feats
-        #if (os.path.isfile(fpath+"feats_%s/"%(dataset)+'{}_{}'.format(video_id, vidName)+".h5")) == False: continue 
-        if (os.path.isfile(fpath+"log/"+'{}_{}'.format(video_id, vidName) +".h5")) == False: continue 
+        #if (os.path.isfile(fpath+"feats_%s/"%(dataset)+'{}_{}'.format(video_id, vidName)+".h5")) == False: continue
+        if (os.path.isfile(fpath+"log/"+'{}_{}'.format(video_id, vidName) +".h5")) == False: continue
 
         feats = h5py.File(fpath+"feat/"+'{}_{}'.format(video_id, vidName) +".h5", "r")
         logs  = h5py.File(fpath+"log/" +'{}_{}'.format(video_id, vidName) +".h5", "r")
@@ -306,7 +308,7 @@ def cluster_texts(texts, clusters=3):
     tfidf_model = vectorizer.fit_transform(texts)
     km_model = KMeans(n_clusters=clusters)
     km_model.fit(tfidf_model)
- 
+
     clustering = collections.defaultdict(list)
 
     print("Top terms per cluster:")
@@ -316,10 +318,10 @@ def cluster_texts(texts, clusters=3):
         print("Cluster %d:" % i),
         for ind in order_centroids[i, :10]:
             print(' %s' % terms[ind]),
- 
+
     for idx, label in enumerate(km_model.labels_):
         clustering[label].append(idx)
- 
+
     return clustering
 
 def cluster_annotations(annotations, k=2):
@@ -328,7 +330,7 @@ def cluster_annotations(annotations, k=2):
     clusters = cluster_texts(annotations['justification'], k)
 
     ind_cluster = np.ndarray([len(annotations)], dtype=np.float32)
-    for key, index in clusters.iteritems():
+    for key, index in clusters.items():
         ind_cluster[index] = key
         #print(key, value)
 
@@ -338,18 +340,9 @@ def load_pickle(path):
     with open(path, 'rb') as f:
         file = pickle.load(f)
         print ('Loaded %s..' %path)
-        return file  
+        return file
 
 def save_pickle(data, path):
     with open(path, 'wb') as f:
         pickle.dump(data, f, pickle.HIGHEST_PROTOCOL)
         print ('Saved %s..' %path)
-
-
-
-
-
-
-
-
-

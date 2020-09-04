@@ -44,6 +44,7 @@ if __name__ == "__main__":
   parser.add_argument('--extractFeature',type=bool, default=True,  help='extract conv features')
   parser.add_argument('--gpu_fraction',  type=float,default=0.7,   help='GPU usage limit')
   args = parser.parse_args()
+  print(args)
 
   if platform == 'win32':
     args.model    = "./model/CNN/model-0.ckpt"
@@ -160,6 +161,7 @@ if __name__ == "__main__":
 
       a = np.concatenate(([_pred_acc], [_target_acc], [_pred_course], [_target_course], [_speed]), axis=0)
       np.savetxt(args.savepath+dataset+'.csv', a, delimiter=',', fmt="%s")
+      print(args.savepath+dataset+'.csv')
       accumResult = []
 
     if args.extractFeature:

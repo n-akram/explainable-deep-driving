@@ -8,7 +8,7 @@
 #
 # Date created      : 20181214
 #
-# Purpose           : Training Visual Attention Model 
+# Purpose           : Training Visual Attention Model
 #
 # Revision History  :
 #
@@ -20,13 +20,13 @@
 
 import  os
 import  sys
-import  argparse
+import  argparse+
 import  json
 import  numpy        as np
 from    server       import  client_generator
-from    src.VA       import  *
+from    src.VA       import  VA
 from    src.preprocessor  import  *
-from    src.config        import  *
+from    src.config        import  dict2
 from    src.utils         import  *
 
 if __name__ == "__main__":
@@ -72,11 +72,11 @@ if __name__ == "__main__":
 
   # Train over the dataset
   data_train  = client_generator(hwm=20, host="localhost", port=args.port)
-  data_val    = client_generator(hwm=20, host="localhost", port=args.val_port) 
+  data_val    = client_generator(hwm=20, host="localhost", port=args.val_port)
 
   for i in range(config.maxiter):
     # Load new dataset
-    img, course, speed, curvature, acc, goaldir  = next(data_train) 
+    img, course, speed, curvature, acc, goaldir  = next(data_train)
 
     # Preprocessing
     img_p, _, acc_p, speed_p, course_p, _, goaldir_p, _ = pre_processor.process(sess, img, course, speed, curvature, acc, goaldir )
@@ -95,7 +95,7 @@ if __name__ == "__main__":
     if (i%config.val_steps==0):
       img, course, speed, curvature, acc, goaldir = next(data_val)
       img_p, _, acc_p, speed_p, course_p, _, goaldir_p, _ = pre_processor.process(sess, img, course, speed, curvature, acc, goaldir)
-      
+
       feed_dict = {VA_model.features:       img_p,
                    VA_model.target_course:  course_p,
                    VA_model.target_acc:     acc_p,
@@ -110,8 +110,7 @@ if __name__ == "__main__":
       checkpoint_path = os.path.join( config.model_path, "model-%d.ckpt"%i )
       filename        = saver.save(sess, checkpoint_path)
       print("Model saved in file: %s" % filename)
-    
-    
+
+
 
   # End of code
-

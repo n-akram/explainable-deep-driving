@@ -7,7 +7,7 @@
 #
 # Date created      : 20181201
 #
-# Purpose           : CNN+FF (feed forward) model 
+# Purpose           : CNN+FF (feed forward) model
 #
 # Revision History  :
 #
@@ -17,7 +17,9 @@
 # Remark
 # Tested on Tensorflow v1.12
 #|**********************************************************************;
-
+#import tensorflow.compat.v1 as tf1
+#tf1.disable_v2_behavior()
+#import tensorflow as tf2
 import tensorflow           as      tf
 from   src.config           import  *
 
@@ -83,8 +85,8 @@ class NVIDIA_CNN(object):
 
   # optimize
   def process(self, sess, x, c, a, s, g):
-    feed = {self.x:                  x, 
-            self.target_course:      c, 
+    feed = {self.x:                  x,
+            self.target_course:      c,
             self.target_accelerator: a,
             self.speed:              s,
             self.goaldir:            g}
@@ -98,8 +100,8 @@ class NVIDIA_CNN(object):
 
   # validation
   def validate(self, sess, x, c, a, s, g):
-    feed = {self.x:                  x, 
-            self.target_course:      c, 
+    feed = {self.x:                  x,
+            self.target_course:      c,
             self.target_accelerator: a,
             self.speed:              s,
             self.goaldir:            g}
@@ -110,13 +112,3 @@ class NVIDIA_CNN(object):
   def extractFeats(self, sess, x):
     feed = {self.x: x}
     return sess.run([self.conv5], feed)
-
-
-
-
-
-
-
-
-
-

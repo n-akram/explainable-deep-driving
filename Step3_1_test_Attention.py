@@ -8,7 +8,7 @@
 #
 # Date created      : 20181214
 #
-# Purpose           : Testing Visual Attention Model 
+# Purpose           : Testing Visual Attention Model
 #
 # Revision History  :
 #
@@ -43,7 +43,7 @@ if __name__ == "__main__":
   parser.add_argument('--extractAttn',   type=bool,  default=True,  help='extract attention maps')
   args = parser.parse_args()
 
-  if platform == 'darwin':
+  if platform == 'win32':
     args.model      = "./model/VA/model-0.ckpt"
     args.savepath   = "./result/VA/"
     config.timelen  = 400+3
@@ -103,20 +103,20 @@ if __name__ == "__main__":
     # preprocess logs
     feat_batch[:nFeat]          = feats['X'][:]
     timestamp_batch[:nFeat]     = preprocess_others(log["timestamp"][:],   nImg)[3:]
-    curvature_batch[:nFeat]     = preprocess_others(log["curvature"][:],   nImg)[3:] 
-    accel_batch[:nFeat]         = preprocess_others(log["accelerator"][:], nImg)[3:] 
-    speed_batch[:nFeat]         = preprocess_others(log["speed"][:],       nImg)[3:] 
-    course_batch[:nFeat]        = preprocess_course(log["course"][:],      nImg)[3:]      
+    curvature_batch[:nFeat]     = preprocess_others(log["curvature"][:],   nImg)[3:]
+    accel_batch[:nFeat]         = preprocess_others(log["accelerator"][:], nImg)[3:]
+    speed_batch[:nFeat]         = preprocess_others(log["speed"][:],       nImg)[3:]
+    course_batch[:nFeat]        = preprocess_course(log["course"][:],      nImg)[3:]
     goaldir_batch[:nFeat]       = preprocess_others(log["goaldir"][:],     nImg)[3:]
 
     # Preprocessing for tensorflow
     feat_p, _, acc_p, speed_p, course_p, _, goaldir_p, _ = pre_processor.process(
-      		sess=sess, 
-      		inImg=np.expand_dims(np.array(feat_batch),0), 
-      		course=np.expand_dims(np.array(course_batch),0), 
-      		speed=np.expand_dims(np.array(speed_batch),0), 
-      		curvature=np.expand_dims(np.array(curvature_batch),0), 
-      		accelerator=np.expand_dims(np.array(accel_batch),0), 
+      		sess=sess,
+      		inImg=np.expand_dims(np.array(feat_batch),0),
+      		course=np.expand_dims(np.array(course_batch),0),
+      		speed=np.expand_dims(np.array(speed_batch),0),
+      		curvature=np.expand_dims(np.array(curvature_batch),0),
+      		accelerator=np.expand_dims(np.array(accel_batch),0),
       		goaldir=np.expand_dims(np.array(goaldir_batch),0) )
 
     # Run a model
@@ -141,30 +141,3 @@ if __name__ == "__main__":
 
   # Total Result
   print(bcolors.HIGHL + 'Done' + bcolors.ENDC)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

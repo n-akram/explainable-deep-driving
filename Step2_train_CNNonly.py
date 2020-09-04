@@ -8,7 +8,7 @@
 #
 # Date created      : 20181201
 #
-# Purpose           : Training CNN+FF (feed forward) model 
+# Purpose           : Training CNN+FF (feed forward) model
 #
 # Revision History  :
 #
@@ -47,9 +47,9 @@ if __name__ == "__main__":
   NVIDIA_model = NVIDIA_CNN(sess, USE_SINGLE_FRAME=USE_SINGLE_FRAME)
 
   # Preprocessor
-  if USE_SINGLE_FRAME: 
+  if USE_SINGLE_FRAME:
     pre_processor = PreProcessor_CNN()
-  else: 
+  else:
     pre_processor = PreProcessor_CNN_4frame()
 
   # tensorflow saver
@@ -60,53 +60,59 @@ if __name__ == "__main__":
 
   # Train over the dataset
   data_train  = client_generator(hwm=20, host="localhost", port=args.port)
-  data_val    = client_generator(hwm=20, host="localhost", port=args.val_port) 
+  data_val    = client_generator(hwm=20, host="localhost", port=args.val_port)
 
   # create folder
   check_and_make_folder(config.model_path)
 
   for i in range(config.maxiter):
     # Load new dataset
+    print(f"training iter: {i}/{config.maxiter}")
     X_batch, course_batch, speed_batch, \
-    curvature_batch, accelerator_batch, goaldir_batch = next(data_train) 
+    curvature_batch, accelerator_batch, goaldir_batch = next(data_train)
+    print("Got data train!")
 
     # Preprocessing
     Xprep_batch, curvatures, accelerators, speeds, \
     courses, _, goaldirs, _ = pre_processor.process(
-      sess, X_batch, course_batch, speed_batch, 
+      sess, X_batch, course_batch, speed_batch,
       curvature_batch, accelerator_batch, goaldir_batch )
+    print("Preproc!")
 
     l1loss, loss_acc, loss_cur, _ = NVIDIA_model.process(
-      sess=sess, 
-      x=Xprep_batch, 
-      c=courses, 
+      sess=sess,
+      x=Xprep_batch,
+      c=courses,
       a=accelerators,
-      s=speeds, 
+      s=speeds,
       g=goaldirs )
+    print("processed!")
 
     if (i%config.val_steps==0):
+      print("val step!")
       X_val, course_val, speed_val, curvature_val, accelerator_val, goaldir_val = next(data_val)
+      print("val data recieved!")
 
       # preprocessing
       Xprep_val, curvatures_val, accelerators_val, speeds_val, \
       courses_val, _, goaldirs_val, _ = pre_processor.process(
         sess, X_val, course_val, speed_val, curvature_val, accelerator_val, goaldir_val)
-
+      print("val preproc!")
       l1loss_val, l1loss_val_acc, l1loss_val_cur, a_pred = NVIDIA_model.validate(
-        sess=sess, 
-        x=Xprep_val, 
-        c=courses_val, 
-        a=accelerators_val, 
-        s=speeds_val, 
+        sess=sess,
+        x=Xprep_val,
+        c=courses_val,
+        a=accelerators_val,
+        s=speeds_val,
         g=goaldirs_val )
-
+      print("val forward prop")
       print("\rStep {} | train loss: {} | val loss: {} (acc: {}, cur: {})".format( i, l1loss, l1loss_val, l1loss_val_acc, l1loss_val_cur))
       sys.stdout.flush()
 
     if i%config.save_steps==0:
+      print("saving!")
       checkpoint_path = os.path.join(config.model_path, "model-{}.ckpt".format(i))
       filename        = saver.save(sess, checkpoint_path)
       print("Current model is saved: {}".format(filename))
-    
+  print("completed!")
   # End of code
-

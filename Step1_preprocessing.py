@@ -17,6 +17,9 @@
 # Remark
 #|**********************************************************************;
 
+import skvideo
+skvideo.setFFmpegPath('C:/ffmpeg-20200809-6e951d0-win64-static/bin')
+
 from    scipy           import interpolate
 import  json
 import  csv
@@ -31,6 +34,7 @@ import  scipy.misc
 import  h5py
 from    random          import shuffle
 import  skvideo.io
+
 import  skvideo.datasets
 from    scipy.ndimage   import rotate
 from    src.utils       import *

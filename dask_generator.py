@@ -62,10 +62,10 @@ def concatenate(camera_names, time_len):
 
         # interpolation
         xaxis               = np.arange(0, nRecords)
-        speed_interp        = interpolate.interp1d(xaxis, speed_value) 
-        course_interp       = interpolate.interp1d(xaxis, course_value) 
-        accelerator_interp  = interpolate.interp1d(xaxis, accelerator_value) 
-        curvature_interp    = interpolate.interp1d(xaxis, curvature_value) 
+        speed_interp        = interpolate.interp1d(xaxis, speed_value)
+        course_interp       = interpolate.interp1d(xaxis, course_value)
+        accelerator_interp  = interpolate.interp1d(xaxis, accelerator_value)
+        curvature_interp    = interpolate.interp1d(xaxis, curvature_value)
         goaldir_interp      = interpolate.interp1d(xaxis, goaldir_value)
 
         idxs = np.linspace(0, nRecords-1, nImg).astype("float")  # approximate alignment
@@ -104,14 +104,14 @@ def concatenate(camera_names, time_len):
 
         # check for mismatched length bug
         print("x {} | c {} | s {} | c {} | a {} | f {} | g {}".format(
-          x.shape[0], course_value.shape[0], speed_value.shape[0], 
+          x.shape[0], course_value.shape[0], speed_value.shape[0],
           curvature_value.shape[0], accelerator_value.shape[0], goods.shape[0], goaldir_value.shape[0]))
 
         if nImg != curvature[-1].shape[0] or nImg != accelerator[-1].shape[0] or nImg != course[-1].shape[0] or nImg != goaldir[-1].shape[0]:
           raise Exception("bad shape")
 
     except IOError:
-      
+
       import traceback
       traceback.print_exc()
       print("failed to open", tword)
@@ -185,15 +185,19 @@ def datagen(filter_files, time_len=1, batch_size=256, ignore_goods=False):
         # low quality loop
         for es, ee, x in c5x:
           if i >= es and i < ee:
-            X_batch[count] = x[i-es-time_len+1:i-es+1]
-            break
+            start, end = i-es-time_len+1, i-es+1
+            print(x.shape, es, ee, start, end)
+            if start >= 0:
+                X_batch[count] = x[start:end]
+                break
 
-        course_batch[count]       = np.copy(course[     i-time_len+1:i+1])[:, None]
-        speed_batch[count]        = np.copy(speed[      i-time_len+1:i+1])[:, None]
-        curvature_batch[count]    = np.copy(curvature[  i-time_len+1:i+1])[:, None]
-        accelerator_batch[count]  = np.copy(accelerator[i-time_len+1:i+1])[:, None]
-        goaldir_batch[count]      = np.copy(goaldir[    i-time_len+1:i+1])[:, None]
-
+        print(i-time_len+1, i+1, len(course), count)
+        if len(course) > i+1:
+            course_batch[count]       = np.copy(course[     i-time_len+1:i+1])[:, None]
+            speed_batch[count]        = np.copy(speed[      i-time_len+1:i+1])[:, None]
+            curvature_batch[count]    = np.copy(curvature[  i-time_len+1:i+1])[:, None]
+            accelerator_batch[count]  = np.copy(accelerator[i-time_len+1:i+1])[:, None]
+            goaldir_batch[count]      = np.copy(goaldir[    i-time_len+1:i+1])[:, None]
         count += 1
 
       # sanity check

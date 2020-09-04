@@ -8,7 +8,7 @@
 #
 # Date created      : 20190108
 #
-# Purpose           : Preprocessing for explanation generator 
+# Purpose           : Preprocessing for explanation generator
 #
 # Revision History  :
 #
@@ -28,7 +28,7 @@ def main():
     #-----------------------
     # Parameters
     #-----------------------
-    if platform == 'darwin':
+    if platform == 'win32':
         param = dict2(**{
             "max_length":       20,    # the maximum length of sentences
             "vid_max_length":   10,    # the maximum length of video sequences
@@ -39,7 +39,7 @@ def main():
             "SAVEPICKLE":       True })
     else:
         raise NotImplementedError
-    
+
     check_and_make_folder(config.h5path+"cap/log/")
     check_and_make_folder(config.h5path+"cap/feat/")
 
@@ -50,7 +50,7 @@ def main():
         check_and_make_folder(config.h5path+param.savepath+'/'+split)
 
         # Step1: Preprocess caption data + refine captions
-        caption_file = config.h5path + 'info/captions_BDDX_' + split + '.json' 
+        caption_file = config.h5path + 'info/captions_BDDX_' + split + '.json'
         annotations  = process_caption_data(caption_file=caption_file, image_dir=config.h5path+'feat/', max_length=param.max_length)
         if param.SAVEPICKLE: save_pickle(annotations, config.h5path + '{}/{}/{}.annotations.pkl'.format(param.savepath, split, split))
         print(bcolors.BLUE   + '[main] Length of {} : {}'.format(split, len(annotations)) + bcolors.ENDC)
@@ -76,10 +76,10 @@ def main():
         if param.SAVEPICKLE: save_pickle(captions, config.h5path + '{}/{}/{}.captions.pkl'.format(param.savepath, split, split))
 
         # Step5: feat & masks
-        all_feats4Cap, all_masks4Cap, all_logs, all_attns4Cap = build_feat_matrix( 
-                                                           annotations=annotations, 
-                                                           max_length=param.vid_max_length, 
-                                                           fpath=config.h5path, 
+        all_feats4Cap, all_masks4Cap, all_logs, all_attns4Cap = build_feat_matrix(
+                                                           annotations=annotations,
+                                                           max_length=param.vid_max_length,
+                                                           fpath=config.h5path,
                                                            FINETUNING=param.FINETUNING)
 
         # Step6: Saving these data into hdf5 format
@@ -88,7 +88,7 @@ def main():
 
         dset = feat.create_dataset("/X",     data=all_feats4Cap, chunks=(param.chunksize, param.vid_max_length, 64, 12, 20) ) #fc8
         dset = feat.create_dataset("/mask",  data=all_masks4Cap)
-        
+
         dset = logs.create_dataset("/attn",  data=all_attns4Cap, chunks=(param.chunksize, param.vid_max_length, 240))
         dset = logs.create_dataset("/Caption",      data=captions)
         dset = logs.create_dataset("/timestamp",    data=all_logs['timestamp'])
@@ -106,13 +106,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
-
-
-
-
